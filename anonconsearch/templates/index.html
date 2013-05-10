@@ -1,0 +1,139 @@
+<html>
+<head>
+	{% load staticfiles %}
+	<title>Anoncon Search</title>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript">
+	window.results_returned = 0;
+	var requestAndAppend = function (index, query, num) {
+		$.getJSON('/query/' + index + '/', function (data) {
+			for (var i=0; i < data.length; i++) {
+				if (data[i].comment && data[i].comment.toLowerCase().indexOf(query.toLowerCase()) !== -1) {
+					$('.results').append("<div class='result'><a href='" + data[i].link + "'>" + data[i].comment + "</a><div class='page'>Page: " + (window.results_returned + 1) + "</div></div>");
+				}
+			}
+			console.log('appended data for ' + index);
+			window.results_returned++;
+			$(".loader p").html("Pages searched: " + window.results_returned);
+			if (window.results_returned >= num) {
+				$(".loader").hide();
+				window.results_returned = 0;
+				$(".loader p").html("Pages searched: " + window.results_returned);
+			}
+
+		});
+	}
+
+	$(document).ready(function () {
+		$('.go').click(function () {
+			window.results_returned = 0;
+			$('.results').empty();
+			$(".loader").show();
+			var num = parseInt($('.num-query').val());
+			var query = $('.query').val();
+			if (!num || num > 200) {
+				console.log("too high");
+				$(".loader").hide();
+				window.results_returned = 0;
+				$(".loader p").html("Pages searched: " + window.results_returned);
+				return;
+			}
+			for (var j=0; j<=num; j++) {
+				console.log("starting query: " + j);
+				requestAndAppend(j, query, num);
+			}
+		});
+
+		$('.clear').click(function () {
+			$('.results').empty();
+		});
+	});
+	</script>
+	<link href='http://fonts.googleapis.com/css?family=Squada+One' rel='stylesheet' type='text/css'>
+	<style type="text/css">
+		html, body {
+			background-color: gray;
+			font-family: "Squada One", sans-serif;
+		}
+
+		.container {
+			width: 700px;
+			margin: 0 auto;
+		}
+
+		h1 {
+			color: white;
+		}
+
+		.info {
+			font-size: 20px;
+		}
+
+		input {
+			width: 300px;
+			height: 50px;
+
+			font-size: 30px;
+			display: block;
+
+			margin-bottom: 30px;
+		}
+
+		.num-query {
+			width: 50px;
+		}
+
+		.result {
+			background-color: white;
+			color: black;
+			font-family: "Helvetica Neue", Helvetica, sans-serif;
+			margin-bottom: 20px;
+
+			padding: 15px;
+			line-height: 1.5em;
+			position: relative;
+		}
+		.result a {
+			color: inherit;
+		}
+		.loader {
+			position: fixed;
+			right: 30px;
+			bottom: 60px;
+			display: none;
+		}
+		.page {
+			position: absolute;
+			right: 5px;
+			bottom: 5px;
+			font-size: 12px;
+			color: gray;
+			color: rgba(0,0,0,.8);
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>Anoncon Search</h1>
+		<p class='info'>Tired of sifting through 70 pages of Anoncon? Search here to see if someone's posted a topic about whatever you want.</p>
+		<p class="semester">Spring 2013</p>
+
+		<div class="main-well">
+			<div class="main-input">
+				<label>What do you want to search for?</label>
+				<input type='text' class='query' />
+
+				<label>How many pages do you want to search?</label>
+				<input type='text' class='num-query' />
+
+				<button class='go'>Go!</button><button class='clear'>Clear results</button>
+			</div>
+		</div>
+		<div class="results"></div>
+		<div class="loader">
+			<img src="{% static 'ajax-loader.gif' %}"/>
+			<p>Pages searched: 0</p>
+		</div>
+	</div>
+</body>
+</html>
