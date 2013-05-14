@@ -5,17 +5,26 @@
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 	<script type="text/javascript">
 	window.results_returned = 0;
-	var requestAndAppend = function (index, query, num) {
+	var requestAndAppend = function (index, query, num, match_case) {
+		var match = match_case || false;
 		var url;
 		if (index > 88) {
 			url = "/query2/";
+			index = index - 88;
 		} else {
 			url = "/query/";
 		}
 		$.getJSON("" + url + index + '/', function (data) {
+			console.log("data from " + "" + url + index + '/')
 			console.log(data);
 			for (var i=0; i < data.length; i++) {
-				if (data[i].comment && data[i].comment.toLowerCase().replace('<br />', ' ').indexOf(query.toLowerCase()) !== -1) {
+				var expr;
+				if (match) {
+					expr = data[i].comment && data[i].comment.replace('<br />', ' ').indexOf(query) !== -1;
+				} else {
+					expr = data[i].comment && data[i].comment.toLowerCase().replace('<br />', ' ').indexOf(query.toLowerCase()) !== -1;
+				}
+				if (expr) {
 					$('.results').append("<div class='result'><a target='_blank' href='" + data[i].link + "'>" + data[i].comment + "</a><div class='page'>Page: " + (window.results_returned + 1) + "</div></div>");
 				}
 			}
@@ -37,6 +46,7 @@
 			$('.results').empty();
 			$(".loader").show();
 			var num = parseInt($('.num-query').val());
+			var match = $(".match-case").prop('checked');
 			var query = $('.query').val();
 			if (!num || num > 400) {
 				console.log("too high");
@@ -47,7 +57,7 @@
 			}
 			for (var j=0; j<=num; j++) {
 				console.log("starting query: " + j);
-				requestAndAppend(j, query, num);
+				requestAndAppend(j, query, num, match);
 			}
 		});
 
@@ -96,8 +106,18 @@
 			margin-bottom: 30px;
 		}
 
+		input.inline {
+			display: inline;
+			width: auto;
+			height: auto;
+		}
+
+		.input-block {
+			display: block;
+		}
+
 		.num-query {
-			width: 50px;
+			width: 90px;
 		}
 
 		.result {
@@ -109,6 +129,7 @@
 			padding: 15px;
 			line-height: 1.5em;
 			position: relative;
+			overflow: hidden;
 		}
 		.result a {
 			color: inherit;
@@ -142,6 +163,11 @@
 
 				<label>How many pages do you want to search?</label>
 				<input type='text' class='num-query' />
+
+				<div class="input-block">
+					<input type='checkbox' class="match-case inline">
+					<label>Match case? (For initials, etc)</label>
+				</div>
 
 				<button class='go'>Go!</button><button class='clear'>Clear results</button>
 			</div>
