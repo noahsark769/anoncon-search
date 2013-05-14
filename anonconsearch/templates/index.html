@@ -5,7 +5,7 @@
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 	<script type="text/javascript">
 	window.results_returned = 0;
-	var requestAndAppend = function (index, query, num, match_case) {
+	var requestAndAppend = function (index, queries, num, match_case) {
 		var match = match_case || false;
 		var url;
 		if (index > 88) {
@@ -18,11 +18,13 @@
 			console.log("data from " + "" + url + index + '/')
 			console.log(data);
 			for (var i=0; i < data.length; i++) {
-				var expr;
-				if (match) {
-					expr = data[i].comment && data[i].comment.replace('<br />', ' ').indexOf(query) !== -1;
-				} else {
-					expr = data[i].comment && data[i].comment.toLowerCase().replace('<br />', ' ').indexOf(query.toLowerCase()) !== -1;
+				var expr = false;
+				for (var k=0; k<queries.length; k++) {
+					if (match) {
+						expr = expr || (data[i].comment && data[i].comment.replace('<br />', ' ').indexOf(queries[k]) !== -1);
+					} else {
+						expr = expr || (data[i].comment && data[i].comment.toLowerCase().replace('<br />', ' ').indexOf(queries[k].toLowerCase()) !== -1);
+					}
 				}
 				if (expr) {
 					$('.results').append("<div class='result'><a target='_blank' href='" + data[i].link + "'>" + data[i].comment + "</a><div class='page'>Page: " + (window.results_returned + 1) + "</div></div>");
@@ -47,7 +49,7 @@
 			$(".loader").show();
 			var num = parseInt($('.num-query').val());
 			var match = $(".match-case").prop('checked');
-			var query = $('.query').val();
+			var queries = $('.query').val().split(",");
 			if (!num || num > 400) {
 				console.log("too high");
 				$(".loader").hide();
@@ -57,7 +59,7 @@
 			}
 			for (var j=0; j<=num; j++) {
 				console.log("starting query: " + j);
-				requestAndAppend(j, query, num, match);
+				requestAndAppend(j, queries, num, match);
 			}
 		});
 
@@ -158,7 +160,7 @@
 
 		<div class="main-well">
 			<div class="main-input">
-				<label>What do you want to search for?</label>
+				<label>What do you want to search for? (Comma separated)</label>
 				<input type='text' class='query' />
 
 				<label>How many pages do you want to search?</label>
