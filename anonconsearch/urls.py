@@ -15,5 +15,6 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
     url(r'^$', 'search.views.home'),
-    url(r'^query/(?P<page_id>\d+)/$', 'search.views.query')
+    url(r'^query/(?P<page_id>\d+)/$', 'search.views.query'),
+    url(r'^query2/(?P<page_id>\d+)/$', 'search.views.query2')
 )

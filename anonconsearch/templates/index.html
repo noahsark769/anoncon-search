@@ -6,13 +6,20 @@
 	<script type="text/javascript">
 	window.results_returned = 0;
 	var requestAndAppend = function (index, query, num) {
-		$.getJSON('/query/' + index + '/', function (data) {
+		var url;
+		if (index > 88) {
+			url = "/query2/";
+		} else {
+			url = "/query/";
+		}
+		$.getJSON("" + url + index + '/', function (data) {
+			console.log(data);
 			for (var i=0; i < data.length; i++) {
-				if (data[i].comment && data[i].comment.toLowerCase().indexOf(query.toLowerCase()) !== -1) {
-					$('.results').append("<div class='result'><a href='" + data[i].link + "'>" + data[i].comment + "</a><div class='page'>Page: " + (window.results_returned + 1) + "</div></div>");
+				if (data[i].comment && data[i].comment.toLowerCase().replace('<br />', ' ').indexOf(query.toLowerCase()) !== -1) {
+					$('.results').append("<div class='result'><a target='_blank' href='" + data[i].link + "'>" + data[i].comment + "</a><div class='page'>Page: " + (window.results_returned + 1) + "</div></div>");
 				}
 			}
-			console.log('appended data for ' + index);
+			console.log('appended data for ' + index + " " + url);
 			window.results_returned++;
 			$(".loader p").html("Pages searched: " + window.results_returned);
 			if (window.results_returned >= num) {
@@ -31,7 +38,7 @@
 			$(".loader").show();
 			var num = parseInt($('.num-query').val());
 			var query = $('.query').val();
-			if (!num || num > 200) {
+			if (!num || num > 400) {
 				console.log("too high");
 				$(".loader").hide();
 				window.results_returned = 0;
